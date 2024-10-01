@@ -1,0 +1,14 @@
+target/
+build/
+.cargo-home/
+
+# --- Secrets ---
+.env
+*.env
+
+# --- CI release bundle (ci/package.py) ---
+dist/
+
+# --- Python ---
+__pycache__/
+*.pyc
