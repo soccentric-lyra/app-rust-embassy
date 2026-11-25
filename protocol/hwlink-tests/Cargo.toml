@@ -1,0 +1,14 @@
+# Host-side test harness for the HWLINK framing module.
+#
+# The firmware is a bare-metal binary, so its modules cannot be built for the
+# host directly.  This tiny crate includes the same src/protocol/frame.rs and
+# runs its #[cfg(test)] suite with std, which is how the protocol is checked in
+# CI without a board or an emulator.
+[package]
+name = "hwlink-frame-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/lib.rs"

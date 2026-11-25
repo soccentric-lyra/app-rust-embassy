@@ -11,6 +11,8 @@ pub mod identity;
 
 /// Application link address (vector table) in the active bank (RBT-001).
 pub const SLOT_BASE: u32 = 0x0800_C000;
+/// Application slot size: 976 KB, matching the bootloader layout.
+pub const SLOT_SIZE: u32 = 0x000F_4000;
 
 // A-9: reserved no-init window at the top of DTCM, shared with BOOT
 // (boot_layout.h BOOT_NOINIT_*).  linker/memory.x and linker/noinit.x place
@@ -24,8 +26,10 @@ pub const NOINIT_SIZE: u32 = 0x0000_0400;
 pub const NOINIT_END: u32 = 0x2002_0000;
 /// Boot metadata sector as mapped by BOOT.
 pub const META_BASE: u32 = 0x0800_8000;
+/// Offset of the 32-byte CONFIRMED record inside the metadata sector.
+pub const CONFIRMED_RECORD_OFFSET: u32 = 0x140;
 /// Address of the 32-byte CONFIRMED record.
-pub const CONFIRMED_ADDR: u32 = META_BASE + 0x140;
+pub const CONFIRMED_ADDR: u32 = META_BASE + CONFIRMED_RECORD_OFFSET;
 
 /// Start of the flash address map.
 pub const FLASH_BASE: u32 = 0x0800_0000;

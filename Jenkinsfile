@@ -89,34 +89,23 @@ pipeline {
             }
         }
 
+        stage('Boot contract') {
+            steps {
+                sh 'python3 scripts/check_boot_contract.py'
+            }
+        }
+
+        stage('Host tests') {
+            steps {
+                sh 'make test-host'
+            }
+        }
+
         stage('Image') {
             steps {
                 sh '''
                     make size
-                    python3 - build/embassy-app.img <<'PY'
-import struct
-import sys
-import zlib
-from pathlib import Path
-
-path = Path(sys.argv[1])
-data = path.read_bytes()
-header = struct.unpack_from("<IHHIIIIIII", data, 0)
-magic, hver, hsize, itype, ver, isize, icrc, load, entry, _ts = header
-assert magic == 0x48574249, "bad image magic"
-assert hver == 1, f"unexpected header version {hver}"
-assert hsize == 256, f"unexpected header size {hsize}"
-assert itype == 1, f"unexpected image type {itype}"
-assert load == 0x0800C000, f"image loads at 0x{load:08X}, expected 0x0800C000"
-assert len(data) == hsize + isize, "image size does not match the header"
-assert zlib.crc32(data[hsize:]) & 0xFFFFFFFF == icrc, "image CRC32 mismatch"
-sp = struct.unpack_from("<I", data, hsize)[0]
-assert 0x20000000 < sp <= 0x20080000, "initial stack pointer is outside internal RAM"
-entry_ok = entry & 1 and 0x0800C000 <= (entry & ~1) < 0x0800C000 + 0x000F4000
-assert entry_ok, "reset vector is outside the slot"
-print(f"image: {path} v{(ver >> 24) & 0xFF}.{(ver >> 16) & 0xFF}.{ver & 0xFF} "
-      f"({isize} bytes payload, entry 0x{entry:08X})")
-PY
+                    python3 scripts/check_image.py build/embassy-app.img --version "$(ci/version.sh)"
                 '''
             }
         }

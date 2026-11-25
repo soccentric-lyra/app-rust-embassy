@@ -13,6 +13,10 @@
 #   make clean          remove build/ and target/
 #   make rebuild        clean, then build
 #   make lint           cargo clippy -D warnings (RGEN-007)
+#   make test-host      run the HWLINK protocol tests on the host
+#   make boot-contract  check the BOOT layout constants (host Python)
+#   make image-check    validate the BOOT image header
+#   make docs           build rustdoc (private items) in the container
 #   make fmt            cargo fmt
 #   make flash          build, then upload build/embassy-app.img through BOOT
 #   make erase-all      erase the whole flash (asks for confirmation)
@@ -68,11 +72,12 @@ PORT     ?=
 # Git Bash resolves python3 to the Microsoft Store stub, which exits non-zero;
 # Windows has the interpreter as python.
 PYTHON   ?= $(if $(filter Windows_NT,$(OS)),python,python3)
+VERSION  := $(shell sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)
 
 .DEFAULT_GOAL := help
 
-.PHONY: all build clean rebuild lint fmt flash erase-all reset debug \
-        gdbserver serial probe size image help
+.PHONY: all build clean rebuild lint test-host boot-contract image-check docs \
+        fmt flash erase-all reset debug gdbserver serial probe size image help
 
 all: build
 
@@ -87,6 +92,18 @@ rebuild: clean
 
 lint:
 	$(CARGO) clippy --release -- -D warnings
+
+test-host:
+	scripts/test-host.sh
+
+boot-contract:
+	$(PYTHON) scripts/check_boot_contract.py
+
+image-check:
+	$(PYTHON) scripts/check_image.py $(IMAGE) --version $(VERSION)
+
+docs:
+	$(DEV) run env CARGO_HOME=/work/.cargo-home cargo doc --no-deps --document-private-items
 
 fmt:
 	$(CARGO) fmt
