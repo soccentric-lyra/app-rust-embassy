@@ -88,7 +88,7 @@ pub fn write(level: char, args: fmt::Arguments) {
     }
 }
 
-/// Rate-limited "task <n> <name>: <purpose>" line, at most once a second.
+/// Rate-limited `task <n> <name>: <purpose>` line, at most once a second.
 ///
 /// Each task owns one and calls [`TaskReport::tick`] once per loop.
 pub struct TaskReport {

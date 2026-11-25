@@ -12,6 +12,7 @@
 #![no_std]
 #![no_main]
 #![deny(warnings)]
+#![deny(clippy::undocumented_unsafe_blocks)]
 
 #[macro_use]
 mod system;

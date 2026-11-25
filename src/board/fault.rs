@@ -366,7 +366,7 @@ fn led3(on: bool) {
     }
 }
 
-/// Flash the [DEMO] Appendix A fault pattern on LD3, then reset
+/// Flash the `DEMO` Appendix A fault pattern on LD3, then reset
 /// (RGEN-004/005).
 ///
 /// Disables interrupts, shows three 100 ms flashes and a 500 ms pause twice
@@ -401,6 +401,8 @@ fn panic(info: &PanicInfo<'_>) -> ! {
 /// # Safety
 ///
 /// Called only by the hardware through the vector table.
+// SAFETY: the vector table is the only caller; the frame is the hardware
+// exception frame and is valid for the duration of the handler.
 #[exception]
 unsafe fn HardFault(frame: &ExceptionFrame) -> ! {
     record_exception(HARD_FAULT, frame);
@@ -414,6 +416,8 @@ unsafe fn HardFault(frame: &ExceptionFrame) -> ! {
 /// Record a MemManage/BusFault/UsageFault from its trampoline and reset.
 ///
 /// `frame` is the stacked exception frame; `kind` is a `FaultRecord::kind`.
+// SAFETY: the name and ABI match the C declaration in platform/platform.c and
+// the naked trampolines below; no Rust code calls it by another signature.
 #[unsafe(no_mangle)]
 pub extern "C" fn fault_handler_c(frame: *const u32, kind: u32) -> ! {
     // SAFETY: the naked trampolines pass the hardware exception frame, which
@@ -434,6 +438,9 @@ macro_rules! fault_trampoline {
         /// # Safety
         ///
         /// Called only by the hardware through the vector table.
+        // SAFETY: naked function with no Rust ABI, entered only through the
+        // vector table; it loads the active hardware frame and branches to
+        // fault_handler_c, which has the matching C ABI.
         #[unsafe(naked)]
         #[unsafe(export_name = $symbol)]
         unsafe extern "C" fn $name() -> ! {
