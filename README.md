@@ -1,5 +1,7 @@
 # app-rust-embassy
 
+[![CI](https://github.com/soccentric-stm32/app-rust-embassy/actions/workflows/ci.yml/badge.svg)](https://github.com/soccentric-stm32/app-rust-embassy/actions/workflows/ci.yml)
+
 The NUCLEO-F767ZI demo application written in Rust on the Embassy async framework. It runs under the A/B bootloader from either slot and does exactly the same job as the C FreeRTOS demo: LED patterns, the user button, HWLINK communication with the desktop GUI, watchdog supervision and self-confirmation after a health check. It shows how a safe, allocation-free Rust application can live inside an existing C bootloader and toolchain ecosystem, and lets you compare Rust and C side by side on the same hardware.
 
 ## Debug terminal
@@ -66,16 +68,25 @@ Activate: ok, device is resetting
 | `src/board/` | MCU and board layer: constants, clock tree, bootloader hand-over, fault handler, factory identity |
 | `src/system/` | Runtime services: IPC channels, logging and build metadata |
 | `src/protocol/` | HWLINK codec: COBS framing, CRC-32 and the fixed-buffer FlatBuffers codec |
-| `protocol/` | Shared `hwlink.fbs` schema |
+| `protocol/` | Shared `hwlink.fbs` schema and the host test harness for `frame.rs` |
 | `linker/` | `memory.x` and `noinit.x` linker scripts |
 | `scripts/` | Host build, container, serial and image tools |
 | `ci/`, `docker/` | CI packaging and the reproducible build image |
+
+## Documentation
+
+- [Architecture](docs/architecture.md): executor and task model, IPC channels, flash map, boot hand-over and the debug flow
+- [API documentation](https://soccentric-stm32.github.io/app-rust-embassy/): rustdoc, private items included, published from `master`
 
 ## Build and run
 
 ```bash
 scripts/docker-dev.sh build   # build the stm32-dev-rust container image once
-scripts/build.sh              # build inside the container
+scripts/build.sh              # build inside the container, with the footprint gate
+make test-host                # HWLINK framing tests on the host
+make boot-contract            # check the BOOT layout constants
+make image-check              # validate the BOOT image header
+make docs                     # build rustdoc in the container
 make flash                    # upload build/embassy-app.img through the bootloader
 make help                     # list all targets
 ```
@@ -94,6 +105,7 @@ bootloader GUI instead.
 - [bootloader](https://github.com/soccentric-stm32/bootloader) — A/B bootloader with UART update, CRC32 checks, trial boot and rollback
 - [app-c-freertos](https://github.com/soccentric-stm32/app-c-freertos) — Demo application in C on FreeRTOS
 - [app-c-zephyr](https://github.com/soccentric-stm32/app-c-zephyr) — Demo application in C on Zephyr RTOS
+- [app-rust-freertos](https://github.com/soccentric-stm32/app-rust-freertos) — Demo application in Rust on FreeRTOS
 - [app-rust-zephyr](https://github.com/soccentric-stm32/app-rust-zephyr) — Demo application in Rust on Zephyr RTOS
 - [validation-firmware](https://github.com/soccentric-stm32/validation-firmware) — HWVAL hardware validation firmware
 - [validation-gui](https://github.com/soccentric-stm32/validation-gui) — HWVAL Studio: desktop GUI for tests, updates and flashing

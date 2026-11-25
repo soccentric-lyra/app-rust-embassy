@@ -8,6 +8,25 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Footprint gate (128 KB flash, 64 KB RAM) and a boot-contract check, matching
+  the other four repositories
+- Host test crate for `src/protocol/frame.rs`: COBS examples, block
+  boundaries, CRC corruption, reserved flags and size limits
+- `cargo audit` and `cargo deny` jobs plus a `deny.toml` policy
+- `docs/architecture.md`: executor/task model, IPC channels, boot hand-over,
+  memory map and the USART6 debug flow
+- `make docs` builds rustdoc with private items; GitHub Actions publishes it
+- SAFETY comments on the remaining unsafe attributes and exception handlers;
+  `clippy::undocumented_unsafe_blocks` is denied
+
+### Changed
+
+- `scripts/build.sh` now enforces the footprint budget after linking
+- The Jenkins image stage reuses `scripts/check_image.py` instead of an inline
+  copy of the header checks
+
 ## [1.0.0] - 2026-11-19
 
 ### Added
